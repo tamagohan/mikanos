@@ -1,2 +1,5 @@
 mikanos/
 day01/bin/
+*.efi
+*.o
+*.img
