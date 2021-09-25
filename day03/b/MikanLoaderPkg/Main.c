@@ -81,11 +81,13 @@ EFI_STATUS SaveMemoryMap(struct MemoryMap *map, EFI_FILE_PROTOCOL *file)
   CHAR8 buf[256];
   UINTN len;
 
-  CHAR8 *header = "Index, Type, Type(name), PhysicalStart, NumberOfPages, Attributes\n";
+  CHAR8 *header =
+      "Index, Type, Type(name), PhysicalStart, NumberOfPages, Attribute\n";
   len = AsciiStrLen(header);
   file->Write(file, &len, header);
 
-  Print(L"map->buffer = %08lx, map->map_size = %08lx\n", map->buffer, map->map_size);
+  Print(L"map->buffer = %08lx, map->map_size = %08lx\n",
+        map->buffer, map->map_size);
 
   EFI_PHYSICAL_ADDRESS iter;
   int i;
@@ -95,14 +97,10 @@ EFI_STATUS SaveMemoryMap(struct MemoryMap *map, EFI_FILE_PROTOCOL *file)
   {
     EFI_MEMORY_DESCRIPTOR *desc = (EFI_MEMORY_DESCRIPTOR *)iter;
     len = AsciiSPrint(
-        buf,
-        sizeof(buf),
+        buf, sizeof(buf),
         "%u, %x, %-ls, %08lx, %lx, %lx\n",
-        i,
-        desc->Type,
-        GetMemoryTypeUnicode(desc->Type),
-        desc->PhysicalStart,
-        desc->NumberOfPages,
+        i, desc->Type, GetMemoryTypeUnicode(desc->Type),
+        desc->PhysicalStart, desc->NumberOfPages,
         desc->Attribute & 0xffffflu);
     file->Write(file, &len, buf);
   }
@@ -222,29 +220,22 @@ EFI_STATUS EFIAPI UefiMain(
 
   EFI_FILE_PROTOCOL *kernel_file;
   root_dir->Open(
-      root_dir,
-      &kernel_file,
-      L"\\kernel.elf",
-      EFI_FILE_MODE_READ,
-      0);
+      root_dir, &kernel_file, L"\\kernel.elf",
+      EFI_FILE_MODE_READ, 0);
 
   UINTN file_info_size = sizeof(EFI_FILE_INFO) + sizeof(CHAR16) * 12;
   UINT8 file_info_buffer[file_info_size];
   kernel_file->GetInfo(
-      kernel_file,
-      &gEfiFileInfoGuid,
-      &file_info_size,
-      file_info_buffer);
+      kernel_file, &gEfiFileInfoGuid,
+      &file_info_size, file_info_buffer);
 
   EFI_FILE_INFO *file_info = (EFI_FILE_INFO *)file_info_buffer;
   UINTN kernel_file_size = file_info->FileSize;
 
   EFI_PHYSICAL_ADDRESS kernel_base_addr = 0x100000;
   gBS->AllocatePages(
-      AllocateAddress,
-      EfiLoaderData,
-      (kernel_file_size + 0xfff) / 0x1000,
-      &kernel_base_addr);
+      AllocateAddress, EfiLoaderData,
+      (kernel_file_size + 0xfff) / 0x1000, &kernel_base_addr);
   kernel_file->Read(kernel_file, &kernel_file_size, (VOID *)kernel_base_addr);
   Print(L"Kernel: 0x%0lx (%lu bytes)\n", kernel_base_addr, kernel_file_size);
 
