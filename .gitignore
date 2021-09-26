@@ -1,6 +1,7 @@
 mikanos/
 day01/bin/
 *.efi
+*.elf
 *.o
 *.img
 .vscode
