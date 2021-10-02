@@ -3,6 +3,7 @@ day01/bin/
 *.efi
 *.elf
 *.o
+*.d
 *.img
 .vscode
 
